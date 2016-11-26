@@ -538,7 +538,15 @@ let lift_query_sum q = fun hset ->
 
 (************************************* Tests **********************************)
 
-(* run f for with i iterations and apply f on output dist to calculate required metric *)
+let metric_convergence ~(p:Pol.t) ~f ~(n:int) : RoutingPerf.t =
+  let rec range i j = if i >= j then [] else i :: (range (i+1) j) in
+  let iterations = range 1 (n+1) in
+  List.fold_left iterations ~init:IntMap.empty
+    ~f:(fun acc i ->
+      Printf.printf "\rIter: %d / %d%!" i n;
+      IntMap.add acc ~key:i ~data:((*Dist.to_string (eval i p)) |> Printf.printf "Dist: %s\n"  ;*) eval i p |> f))
+
+(* run f for with i iterations and apply f on output dist to calculate required metric 
 let metric_convergence ~(p:Pol.t) ~f ~(n:int) : RoutingPerf.t =
   let rec range i j = if i >= j then [] else i :: (range (i+1) j) in
   let iterations = range 1 (n+1) in
@@ -546,6 +554,7 @@ let metric_convergence ~(p:Pol.t) ~f ~(n:int) : RoutingPerf.t =
     ~f:(fun acc i ->
       Printf.printf "\rIter: %d / %d%!" i n;
       IntMap.add acc ~key:i ~data:(eval i p |> f))
+*)
 
 (* Input: topology, routing policy, input distribution.
  * Out: perf stats vs number of star iterations *)
@@ -661,7 +670,7 @@ let command =
   ~summary:"TE with ProbNetKAT"
   Command.Spec.(
     empty
-    +> anon ("topolgy" %: string)
+    +> anon ("topology" %: string)
     +> flag "-lfp" (optional float) ~doc:" Probability of link failure"
     +> flag "-iter" (optional int) ~doc:" Number of iterations"
     +> flag "-spf" no_arg ~doc:" SPF"

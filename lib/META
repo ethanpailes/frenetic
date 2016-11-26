@@ -1,9 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: 1188baa36d3c314b0f6b956d04d5e7fc)
+# DO NOT EDIT (digest: de4006e1689ddbbe50691e3b15c5b06e)
 version = "4.0.0"
 description = "The Frenetic Compiler and Runtime System"
 requires =
-"core ppx_jane ppx_deriving.eq ppx_deriving.enum ppx_deriving.show ppx_deriving.make"
+"core cstruct ocamlgraph ppx_jane ppx_deriving.eq ppx_deriving.enum ppx_deriving.show ppx_deriving.make str tcpip"
 archive(byte) = "prob.cma"
 archive(byte, plugin) = "prob.cma"
 archive(native) = "prob.cmxa"
