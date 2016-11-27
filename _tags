@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5b9903679ef2fe09a166fe8c43f7f644)
+# DO NOT EDIT (digest: f5a80d8c7f1647c551445df13c2fa24d)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -19,20 +19,40 @@ true: annot, bin_annot
 <examples/probnetkat/*.ml{,i,y}>: package(frenetic)
 # Library prob
 "lib/prob.cmxs": use_prob
+# Executable probnetkat_te
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(core)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(cstruct)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ocamlgraph)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ppx_deriving.enum)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ppx_deriving.eq)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ppx_deriving.make)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ppx_deriving.show)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(ppx_jane)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(str)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: package(tcpip)
+<lib/Frenetic_ProbNetKAT_TE.{native,byte}>: use_prob
 # Executable probnetkat_interp
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(core)
+<lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(cstruct)
+<lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ocamlgraph)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ppx_deriving.enum)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ppx_deriving.eq)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ppx_deriving.make)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ppx_deriving.show)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(ppx_jane)
+<lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(str)
+<lib/Frenetic_ProbNetKAT_Test.{native,byte}>: package(tcpip)
 <lib/Frenetic_ProbNetKAT_Test.{native,byte}>: use_prob
 <lib/*.ml{,i,y}>: package(core)
+<lib/*.ml{,i,y}>: package(cstruct)
+<lib/*.ml{,i,y}>: package(ocamlgraph)
 <lib/*.ml{,i,y}>: package(ppx_deriving.enum)
 <lib/*.ml{,i,y}>: package(ppx_deriving.eq)
 <lib/*.ml{,i,y}>: package(ppx_deriving.make)
 <lib/*.ml{,i,y}>: package(ppx_deriving.show)
 <lib/*.ml{,i,y}>: package(ppx_jane)
+<lib/*.ml{,i,y}>: package(str)
+<lib/*.ml{,i,y}>: package(tcpip)
 <lib/*.ml{,i,y}>: use_prob
 # OASIS_STOP
 <lib/Frenetic_NetKAT_Parser.ml{,i}>: syntax_camlp4o
