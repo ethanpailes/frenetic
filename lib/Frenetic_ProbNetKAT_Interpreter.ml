@@ -377,11 +377,15 @@ module Interp (Hist : PSEUDOHISTORY) (Prob : PROB) = struct
       |> Printf.sprintf "{ %s }"
   end
 
+  module HSetAndLink = struct
+    type t = HSet.t * bool [@@deriving sexp, compare]
+  end
+
   module Dist = struct
-    include Dist(HSet)(Prob)
+    include Dist(HSetAndLink)(Prob)
     let to_string t =
       T.to_alist t
-      |> List.map ~f:(fun (hs, prob) ->
+      |> List.map ~f:(fun ((hs, links), prob) -> (* TODO: print links *)
         Printf.sprintf "%s \027[0;31m@\027[0m %s" (HSet.to_string hs) (Prob.to_string prob))
       |> String.concat ~sep:"\n"
       |> Printf.sprintf "%s\n"
@@ -391,22 +395,22 @@ module Interp (Hist : PSEUDOHISTORY) (Prob : PROB) = struct
 
   let eval (n : int) (p : Pol.t) : Dist.Kernel.t =
     let open Dist.Monad in
-    let rec eval (p : Pol.t) (inp : HSet.t) : Dist.t =
+    let rec eval (p : Pol.t) ((hset, links) as inp : HSetAndLink.t) : Dist.t =
       match p with
       | Id ->
         return inp
       | Drop ->
-        return HSet.empty
+        return (HSet.empty, links)
       | Dup ->
-        return (HSet.map inp ~f:Hist.dup)
+        return ((HSet.map hset ~f:Hist.dup), links)
       | Test hv ->
-        return (HSet.filter_map inp ~f:(Hist.test ~hv))
+        return ((HSet.filter_map hset ~f:(Hist.test ~hv)), links)
       | Mod hv ->
-        return (HSet.map inp ~f:(Hist.modify ~hv))
+        return ((HSet.map hset ~f:(Hist.modify ~hv)), links)
       | Union (q,r) ->
-        let%bind a1 = eval q inp in
-        let%bind a2 = eval r inp in
-        return (HSet.union a1 a2)
+        let%bind (a1, _) = eval q inp in
+        let%bind (a2, _) = eval r inp in
+        return ((HSet.union a1 a2), links)
       | Seq (q,r)->
         let%bind a = eval q inp in
         eval r a
@@ -416,24 +420,25 @@ module Interp (Hist : PSEUDOHISTORY) (Prob : PROB) = struct
       | Star q ->
         star n q inp
 
-    and star (n : int) (p : Pol.t) (inp : HSet.t) : Dist.t =
+    and star (n : int) (p : Pol.t) ((hset, links) as inp : HSetAndLink.t) : Dist.t =
       match n with
       | 0 ->
         return inp
       | _ ->
         let%bind a = eval p inp in
-        let%bind b = star (n-1) p a in
-        return (HSet.union inp b)
+        let%bind (b, _) = star (n-1) p a in
+        return ((HSet.union hset b), links)
 
     in eval p
 
   (* Given RV f : 2^H -> |R, compute expectation E[f] w.r.t. distribution
      mu = [|p|]_n inp  *)
-  let expectation ?(inp=Dist.dirac (HSet.singleton (Hist.make ()))) (n : int)
-    (p : Pol.t) ~(f : HSet.t -> Prob.t) =
+  let expectation ?(inp=Dist.dirac ((HSet.singleton (Hist.make ())), false)) (n : int)
+    (p : Pol.t) ~(f : HSetAndLink.t -> Prob.t) =
     let open Dist.Monad in
     inp >>= eval n p |> Dist.expectation ~f
 
+  (*
   let expectation' ?(inp : Dist.t option) (n : int) (p : Pol.t)  ~(f : Hist.t -> Prob.t) =
     expectation n p ?inp ~f:(fun hset ->
       let n = HSet.length hset in
@@ -450,6 +455,7 @@ module Interp (Hist : PSEUDOHISTORY) (Prob : PROB) = struct
     let tmp_prob = Dist.fold tmp_dist ~init:Prob.zero ~f:(fun ~key:_ ~data:prob acc -> Prob.(acc + prob)) in
     let out_dist = Dist.filter_map tmp_dist ~f:(fun prob -> Some Prob.(prob * tot_prob / tmp_prob)) in
     Dist.expectation out_dist ~f:f
+  *)
 
 
   (* allows convenient specification of probabilities *)
@@ -457,6 +463,6 @@ module Interp (Hist : PSEUDOHISTORY) (Prob : PROB) = struct
     Prob.(of_int a / of_int b)
 
   (* export more convenient eval *)
-  let eval ?(inp=HSet.singleton (Hist.make ())) n p = eval n p inp
+  let eval ?(inp=(HSet.singleton (Hist.make ()), false)) n p = eval n p inp
 
 end
